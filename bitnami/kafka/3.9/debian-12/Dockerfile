@@ -16,7 +16,7 @@ RUN mvn --batch-mode dependency:copy -Dartifact=commons-beanutils:commons-beanut
     mvn --batch-mode dependency:copy -Dartifact=org.codehaus.plexus:plexus-utils:3.6.1              -DoutputDirectory=/jars && \
     mvn --batch-mode dependency:copy -Dartifact=org.eclipse.jetty:jetty-http:9.4.57.v20241219       -DoutputDirectory=/jars && \
     mvn --batch-mode dependency:copy -Dartifact=org.eclipse.jetty:jetty-server:9.4.57.v20241219     -DoutputDirectory=/jars && \
-    mvn --batch-mode dependency:copy -Dartifact=org.lz4:lz4-java:1.10.1                            -DoutputDirectory=/jars && \
+    mvn --batch-mode dependency:copy -Dartifact=org.lz4:lz4-java:1.8.1                             -DoutputDirectory=/jars && \
     mvn --batch-mode dependency:copy -Dartifact=org.apache.zookeeper:zookeeper:3.8.6               -DoutputDirectory=/jars && \
     mvn --batch-mode dependency:copy -Dartifact=org.apache.zookeeper:zookeeper-jute:3.8.6          -DoutputDirectory=/jars
 
