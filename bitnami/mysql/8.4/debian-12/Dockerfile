@@ -48,6 +48,9 @@ RUN mkdir /docker-entrypoint-initdb.d /docker-entrypoint-startdb.d
 RUN uninstall_packages curl gpgv libfile-find-rule-perl openssl \
     libpam-modules libpam-modules-bin libpam-runtime \
     perl perl-modules-5.36
+RUN apt-get purge -y --auto-remove apt apt-utils && \
+    rm -rf /var/lib/apt /var/cache/apt /usr/lib/apt /etc/apt && \
+    rm -f /usr/sbin/install_packages /usr/sbin/uninstall_packages
 
 COPY rootfs /
 RUN /opt/bitnami/scripts/mysql/postunpack.sh
