@@ -45,7 +45,9 @@ RUN apt-get update && apt-get upgrade -y && \
 RUN chmod g+rwX /opt/bitnami
 RUN find / -perm /6000 -type f -exec chmod a-s {} \; || true
 RUN mkdir /docker-entrypoint-initdb.d /docker-entrypoint-startdb.d
-RUN uninstall_packages curl
+RUN uninstall_packages curl gpgv libfile-find-rule-perl openssl \
+    libpam-modules libpam-modules-bin libpam-runtime \
+    perl perl-modules-5.36
 
 COPY rootfs /
 RUN /opt/bitnami/scripts/mysql/postunpack.sh
