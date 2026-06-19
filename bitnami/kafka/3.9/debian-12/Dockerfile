@@ -10,13 +10,13 @@ RUN go install github.com/bitnami/wait-for-port@latest && \
 FROM maven:3-eclipse-temurin-17 AS jar-downloader
 WORKDIR /jars
 RUN mvn --batch-mode dependency:copy -Dartifact=commons-beanutils:commons-beanutils:1.11.0          -DoutputDirectory=/jars && \
-    mvn --batch-mode dependency:copy -Dartifact=io.netty:netty-codec:4.1.133.Final                  -DoutputDirectory=/jars && \
-    mvn --batch-mode dependency:copy -Dartifact=io.netty:netty-handler:4.1.133.Final                -DoutputDirectory=/jars && \
+    mvn --batch-mode dependency:copy -Dartifact=io.netty:netty-codec:4.1.135.Final                  -DoutputDirectory=/jars && \
+    mvn --batch-mode dependency:copy -Dartifact=io.netty:netty-handler:4.1.135.Final                -DoutputDirectory=/jars && \
     mvn --batch-mode dependency:copy -Dartifact=org.bitbucket.b_c:jose4j:0.9.6                     -DoutputDirectory=/jars && \
     mvn --batch-mode dependency:copy -Dartifact=org.codehaus.plexus:plexus-utils:3.6.1              -DoutputDirectory=/jars && \
     mvn --batch-mode dependency:copy -Dartifact=org.eclipse.jetty:jetty-http:9.4.57.v20241219       -DoutputDirectory=/jars && \
     mvn --batch-mode dependency:copy -Dartifact=org.eclipse.jetty:jetty-server:9.4.57.v20241219     -DoutputDirectory=/jars && \
-    mvn --batch-mode dependency:copy -Dartifact=org.lz4:lz4-java:1.8.1                             -DoutputDirectory=/jars && \
+    mvn --batch-mode dependency:copy -Dartifact=org.lz4:lz4-java:1.10.1                            -DoutputDirectory=/jars && \
     mvn --batch-mode dependency:copy -Dartifact=org.apache.zookeeper:zookeeper:3.8.6               -DoutputDirectory=/jars && \
     mvn --batch-mode dependency:copy -Dartifact=org.apache.zookeeper:zookeeper-jute:3.8.6          -DoutputDirectory=/jars
 
