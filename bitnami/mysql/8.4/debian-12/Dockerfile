@@ -22,7 +22,7 @@ RUN apt-get update && apt-get upgrade -y && \
 # perl/libperl5.36/perl-base: MySQL is a compiled binary, no script uses Perl.
 # openssl CLI: MySQL links libssl3 (the library), not the CLI tool.
 # --force-depends bypasses reverse-dependency checks safe in a container.
-RUN dpkg --purge --force-depends \
+RUN dpkg --purge --force-depends --force-remove-essential \
         openssl \
         libfile-find-rule-perl \
         perl \
