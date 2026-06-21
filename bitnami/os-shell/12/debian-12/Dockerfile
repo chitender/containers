@@ -2,27 +2,12 @@
 # SPDX-License-Identifier: APACHE-2.0
 
 # Stage 1: Rebuild Go binaries with Go 1.26+ to fix 15 Go stdlib CVEs in
-# ini-file, render-template, scuttle, wait-for-port, and yq (were compiled with Go v1.25.0)
+# ini-file, render-template, wait-for-port, and yq (were compiled with Go v1.25.0)
 FROM golang:1.26-bookworm AS go-builder
-# Clear credential helper so go's internal git can clone public repos
-# without prompting (golang base image ships one that requires a TTY)
-RUN git config --global credential.helper ""
 RUN go install github.com/bitnami/ini-file@latest && \
     go install github.com/bitnami/render-template@latest && \
     go install github.com/bitnami/wait-for-port@latest && \
     go install github.com/mikefarah/yq/v4@latest
-# scuttle is not on the Go module proxy; use tags API (repo has no releases)
-# to resolve the latest tag, then download and build from the tarball
-RUN SCUTTLE_TAG=$(curl -fsSL "https://api.github.com/repos/superorbital/scuttle/tags" \
-        | grep '"name"' | head -1 | sed 's/.*"name": "\([^"]*\)".*/\1/') \
-    && if [ -z "${SCUTTLE_TAG}" ]; then echo "ERROR: could not resolve scuttle tag" && exit 1; fi \
-    && echo "Building scuttle ${SCUTTLE_TAG}" \
-    && mkdir -p /tmp/scuttle \
-    && curl -fsSL "https://github.com/superorbital/scuttle/archive/refs/tags/${SCUTTLE_TAG}.tar.gz" \
-       | tar -xz -C /tmp/scuttle --strip-components=1 \
-    && cd /tmp/scuttle \
-    && CGO_ENABLED=0 go build -ldflags="-s -w" -o /go/bin/scuttle . \
-    && rm -rf /tmp/scuttle
 
 # Stage 2: Patched os-shell image
 FROM docker.io/bitnamilegacy/os-shell:12-debian-12-r51
@@ -30,16 +15,16 @@ FROM docker.io/bitnamilegacy/os-shell:12-debian-12-r51
 USER root
 
 # Replace Go binaries compiled with Go 1.25.0 with Go 1.26+ builds.
-# Fixes 15 CVEs across all five binaries including CVE-2025-68121 (CRITICAL)
+# Fixes 15 CVEs across four binaries including CVE-2025-68121 (CRITICAL)
 # and 14 HIGH severity stdlib vulnerabilities.
 COPY --from=go-builder /go/bin/ini-file         /opt/bitnami/common/bin/ini-file
 COPY --from=go-builder /go/bin/render-template  /opt/bitnami/common/bin/render-template
-COPY --from=go-builder /go/bin/scuttle          /opt/bitnami/common/bin/scuttle
 COPY --from=go-builder /go/bin/wait-for-port    /opt/bitnami/common/bin/wait-for-port
 COPY --from=go-builder /go/bin/yq               /opt/bitnami/common/bin/yq
 
 # Remove stale SPDX manifests — they still reference Go 1.25.0 and cause
 # false-positive CVE hits in scanners after the binary replacement above.
+# scuttle is left as-is (Istio-only helper, not needed in this image).
 RUN rm -f /opt/bitnami/common/.spdx-ini-file.spdx \
           /opt/bitnami/common/.spdx-render-template.spdx \
           /opt/bitnami/common/.spdx-scuttle.spdx \
