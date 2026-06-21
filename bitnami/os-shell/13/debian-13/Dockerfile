@@ -34,6 +34,11 @@ COPY --from=go-builder /go/bin/render-template  /opt/bitnami/common/bin/render-t
 COPY --from=go-builder /go/bin/wait-for-port    /opt/bitnami/common/bin/wait-for-port
 COPY --from=go-builder /go/bin/yq               /opt/bitnami/common/bin/yq
 
+# Remove perl-base — os-shell has no Perl scripts.
+# Eliminates CVE-2026-42496 (CRITICAL), CVE-2026-8376 (CRITICAL), CVE-2026-42497,
+# CVE-2026-48962, and CVE-2026-9538 which have no available Debian 13 fix.
+RUN dpkg --purge --force-depends --force-remove-essential perl-base
+
 RUN useradd -r -u 1001 -g root os-shell
 RUN find / -perm /6000 -type f -exec chmod a-s {} \; || true
 
