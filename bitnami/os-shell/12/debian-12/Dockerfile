@@ -4,14 +4,18 @@
 # Stage 1: Rebuild Go binaries with Go 1.26+ to fix 15 Go stdlib CVEs in
 # ini-file, render-template, scuttle, wait-for-port, and yq (were compiled with Go v1.25.0)
 FROM golang:1.26-bookworm AS go-builder
+# Clear credential helper so go's internal git can clone public repos
+# without prompting (golang base image ships one that requires a TTY)
+RUN git config --global credential.helper ""
 RUN go install github.com/bitnami/ini-file@latest && \
     go install github.com/bitnami/render-template@latest && \
     go install github.com/bitnami/wait-for-port@latest && \
     go install github.com/mikefarah/yq/v4@latest
-# scuttle is not on the Go module proxy; fetch latest release tag via GitHub API
-# then download that tarball — avoids git credential helper issues
-RUN SCUTTLE_TAG=$(curl -fsSL "https://api.github.com/repos/superorbital/scuttle/releases/latest" \
-        | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": "\([^"]*\)".*/\1/') \
+# scuttle is not on the Go module proxy; use tags API (repo has no releases)
+# to resolve the latest tag, then download and build from the tarball
+RUN SCUTTLE_TAG=$(curl -fsSL "https://api.github.com/repos/superorbital/scuttle/tags" \
+        | grep '"name"' | head -1 | sed 's/.*"name": "\([^"]*\)".*/\1/') \
+    && if [ -z "${SCUTTLE_TAG}" ]; then echo "ERROR: could not resolve scuttle tag" && exit 1; fi \
     && echo "Building scuttle ${SCUTTLE_TAG}" \
     && mkdir -p /tmp/scuttle \
     && curl -fsSL "https://github.com/superorbital/scuttle/archive/refs/tags/${SCUTTLE_TAG}.tar.gz" \
