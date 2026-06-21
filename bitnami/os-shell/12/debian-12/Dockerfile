@@ -8,9 +8,13 @@ RUN go install github.com/bitnami/ini-file@latest && \
     go install github.com/bitnami/render-template@latest && \
     go install github.com/bitnami/wait-for-port@latest && \
     go install github.com/mikefarah/yq/v4@latest
-# scuttle is not on the Go module proxy; download known tag via tarball to avoid git auth issues
-RUN mkdir -p /tmp/scuttle \
-    && curl -fsSL https://github.com/superorbital/scuttle/archive/refs/tags/v1.1.15.tar.gz \
+# scuttle is not on the Go module proxy; fetch latest release tag via GitHub API
+# then download that tarball — avoids git credential helper issues
+RUN SCUTTLE_TAG=$(curl -fsSL "https://api.github.com/repos/superorbital/scuttle/releases/latest" \
+        | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": "\([^"]*\)".*/\1/') \
+    && echo "Building scuttle ${SCUTTLE_TAG}" \
+    && mkdir -p /tmp/scuttle \
+    && curl -fsSL "https://github.com/superorbital/scuttle/archive/refs/tags/${SCUTTLE_TAG}.tar.gz" \
        | tar -xz -C /tmp/scuttle --strip-components=1 \
     && cd /tmp/scuttle \
     && CGO_ENABLED=0 go build -ldflags="-s -w" -o /go/bin/scuttle . \
