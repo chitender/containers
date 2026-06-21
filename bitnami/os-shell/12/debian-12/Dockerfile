@@ -8,11 +8,12 @@ RUN go install github.com/bitnami/ini-file@latest && \
     go install github.com/bitnami/render-template@latest && \
     go install github.com/bitnami/wait-for-port@latest && \
     go install github.com/mikefarah/yq/v4@latest
-# scuttle is not indexed on the Go module proxy; clone and build directly
-RUN git clone --depth 1 https://github.com/superorbital/scuttle.git /tmp/scuttle \
-    && cd /tmp/scuttle \
+# scuttle is not on the Go module proxy; download tarball to avoid git auth issues
+RUN curl -fsSL https://github.com/superorbital/scuttle/archive/refs/heads/main.tar.gz \
+        | tar -xz -C /tmp \
+    && cd /tmp/scuttle-main \
     && CGO_ENABLED=0 go build -ldflags="-s -w" -o /go/bin/scuttle . \
-    && rm -rf /tmp/scuttle
+    && rm -rf /tmp/scuttle-main
 
 # Stage 2: Patched os-shell image
 FROM docker.io/bitnamilegacy/os-shell:12-debian-12-r51
